@@ -11,6 +11,13 @@
     tools:context="com.journaldev.gpslocationtracking.MainActivity">
 
     <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn2"
+            android:text="Save Data"
+            android:layout_centerHorizontal="true" android:layout_alignParentBottom="true"
+            android:layout_marginBottom="153dp"/>
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btn"

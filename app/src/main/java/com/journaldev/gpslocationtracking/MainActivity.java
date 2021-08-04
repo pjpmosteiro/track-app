@@ -103,8 +103,24 @@ public class MainActivity extends AppCompatActivity {
                     StrictMode.setThreadPolicy(policy);
                 }
 
+                //TODO: Generar fichero con los puntos de trayectoria
 
-                    sendMessage.sendMessage(Double.toString(latitude), Double.toString(longitude));
+            //Codigo para enviar ubicacion cada 5 segundos
+//                try {
+//                    while (true) {
+//                        String url = "https://www.google.com/maps/search/?api=1&query="+Double.toString(latitude)+","+Double.toString(longitude);
+//                        sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url);
+//                        Thread.sleep(5 * 1000);
+//                    }
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+
+
+                //Transferimos latitud, longitud y url de maps al sistema
+                    String url = "https://www.google.com/maps/search/?api=1&query="+Double.toString(latitude)+","+Double.toString(longitude);
+                    sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url);
+
                     Iterator it = listadoCoordenadas.entrySet().iterator();
                     while (it.hasNext()) {
                         Map.Entry pair = (Map.Entry)it.next();

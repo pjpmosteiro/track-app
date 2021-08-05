@@ -8,31 +8,28 @@ import android.os.StrictMode;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.*;
 
 public class MainActivity extends AppCompatActivity {
 
 
     private ArrayList<String> permissionsToRequest;
-    private ArrayList<String> permissionsRejected = new ArrayList<>();
-    private ArrayList<String> permissions = new ArrayList<>();
+    private final ArrayList<String> permissionsRejected = new ArrayList<>();
+    private final ArrayList<String> permissions = new ArrayList<>();
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
     LocationTrack locationTrack;
-    HashMap<String, String> listadoCoordenadas = new HashMap<String, String>();
 
     SendMessage sendMessage = new SendMessage();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         permissions.add(ACCESS_FINE_LOCATION);
         permissions.add(ACCESS_COARSE_LOCATION);
+        permissions.add(INTERNET);
 
         permissionsToRequest = findUnAskedPermissions(permissions);
         //get the permissions we have asked for before but are not granted..
@@ -48,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
 
             if (permissionsToRequest.size() > 0)
                 requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
@@ -73,10 +70,9 @@ public class MainActivity extends AppCompatActivity {
                     double latitude = locationTrack.getLatitude();
 
 //                    Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), "Latitud:" + Double.toString(latitude) + "\nLongitud:" + Double.toString(longitude), Toast.LENGTH_SHORT).show();
-                    fileManager.writeToFile("Latitud: "+Double.toString(latitude) + "\nLongitud:" + Double.toString(longitude), MainActivity.this);
+                    Toast.makeText(getApplicationContext(), "Latitud:" + latitude + "\nLongitud:" + longitude, Toast.LENGTH_SHORT).show();
+                    fileManager.writeToFile("Latitud: " + latitude + "\nLongitud:" + longitude, MainActivity.this);
 
-                    listadoCoordenadas.put(Double.toString(latitude), Double.toString(longitude));
 
                 } else {
 
@@ -87,29 +83,34 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button btn2 = (Button) findViewById(R.id.btn2);
+        EditText textInput   = (EditText)findViewById(R.id.text01);
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                strictModeDisabler();
+
                 locationTrack = new LocationTrack(MainActivity.this);
                 double longitude = locationTrack.getLongitude();
                 double latitude = locationTrack.getLatitude();
-
-                    Toast.makeText(getApplicationContext(), "Guardando datos", Toast.LENGTH_SHORT).show();
-                    //fileManager.writeToFile("Latitud: "+Double.toString(latitude) + "\nLongitud:" + Double.toString(longitude), MainActivity.this);
-
-                if (android.os.Build.VERSION.SDK_INT > 9)
-                {
-                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                    StrictMode.setThreadPolicy(policy);
+                String token = null;
+                //Request the token URL
+                GetToken getToken = new GetToken();
+                try {
+                    token = getToken.getToken();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+
+                Toast.makeText(getApplicationContext(), "Enviando datos", Toast.LENGTH_SHORT).show();
+
 
                 //TODO: Generar fichero con los puntos de trayectoria
 
-            //Codigo para enviar ubicacion cada 5 segundos
+                //Codigo para enviar ubicacion cada 5 segundos
 //                try {
 //                    while (true) {
 //                        String url = "https://www.google.com/maps/search/?api=1&query="+Double.toString(latitude)+","+Double.toString(longitude);
-//                        sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url);
+//                    sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url, token);
 //                        Thread.sleep(5 * 1000);
 //                    }
 //                } catch (InterruptedException e) {
@@ -118,22 +119,49 @@ public class MainActivity extends AppCompatActivity {
 
 
                 //Transferimos latitud, longitud y url de maps al sistema
-                    String url = "https://www.google.com/maps/search/?api=1&query="+Double.toString(latitude)+","+Double.toString(longitude);
-                    sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url);
+//                while (loopController == 1) {
+//                    startLoop(longitude, latitude, token);
+//                }
 
-                    Iterator it = listadoCoordenadas.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry pair = (Map.Entry)it.next();
-                        System.out.println("control"+pair.getKey() + " = " + pair.getValue());
-                        it.remove(); // avoids a ConcurrentModificationException
+//                if (loopController != 1) {
+//                    String url = "https://www.google.com/maps/search/?api=1&query=" + Double.toString(latitude) + "," + Double.toString(longitude);
+//                    sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url, token);
+//                }
+
+                    String url = "https://www.google.com/maps/search/?api=1&query=" + latitude + "," + longitude;
+                    sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url, token);
+
+                    if (textInput.getText().toString() != ""){
+                        sendMessage.sendMessageWithoutCoordinates(textInput.getText().toString(), url, token);
                     }
 
+            }
 
+            private void strictModeDisabler() {
+                if (Build.VERSION.SDK_INT > 9) {
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
+                }
             }
         });
 
 
+//
     }
+
+
+
+
+
+//        try {
+//            while (true) {
+//                String url = "https://www.google.com/maps/search/?api=1&query=" + Double.toString(latitude) + "," + Double.toString(longitude);
+//                sendMessage.sendMessage(Double.toString(longitude), Double.toString(latitude), url, token);
+//                Thread.sleep(5 * 1000);
+//            }
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
 
 

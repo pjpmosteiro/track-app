@@ -10,17 +10,27 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.journaldev.gpslocationtracking.MainActivity">
 
+
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn2"
             android:text="Save Data"
             android:layout_centerHorizontal="true" android:layout_alignParentBottom="true"
-            android:layout_marginBottom="153dp"/>
+            android:layout_marginBottom="101dp"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btn"
         android:layout_centerInParent="true"
         android:text="GET LOCATION" />
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text=""
+            android:ems="10"
+            android:id="@+id/text01" android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true" android:layout_marginTop="216dp"/>
+    <!---->
 </RelativeLayout>
